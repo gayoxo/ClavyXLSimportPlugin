@@ -69,7 +69,7 @@ public class CollectionSQL implements InterfaceXLSparser {
 	  *            - Nombre de archivo Excel.
 	 
 	  */
-	 private void Leer_Archivo_Excel(String Nombre_Archivo) {
+	 public void Leer_Archivo_Excel(String Nombre_Archivo) {
 	 
 	  /**
 	 

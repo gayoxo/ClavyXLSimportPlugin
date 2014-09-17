@@ -26,8 +26,24 @@ public class LoadCollectionXLS extends LoadCollection{
 	@Override
 	public CompleteCollectionAndLog processCollecccion(
 			ArrayList<String> dateEntrada) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		CollectionSQL C=null;
+		 ArrayList<String> Log = new ArrayList<String>();
+		if (dateEntrada.size()>0 && !dateEntrada.get(0).isEmpty())
+		{ 
+		String fileName = dateEntrada.get(0);
+		 System.out.println(fileName);
+		 C = new CollectionSQL();
+		 C.Leer_Archivo_Excel(fileName);
+		}
+		else
+		{
+			if (dateEntrada.size()<=0)
+					Log.add("Error: Numero de Elementos de entrada invalidos");
+			if (dateEntrada.get(0).isEmpty()) 
+				Log.add("Error: Path del file vacio");
+		}
+		 return new CompleteCollectionAndLog(C.getColeccion(),Log);
 	}
 
 	@Override
