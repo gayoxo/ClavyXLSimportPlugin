@@ -27,13 +27,13 @@ public class LoadCollectionXLS extends LoadCollection{
 	public CompleteCollectionAndLog processCollecccion(
 			ArrayList<String> dateEntrada) {
 		
-		CollectionSQL C=null;
+		CollectionXLS C=null;
 		 ArrayList<String> Log = new ArrayList<String>();
 		if (dateEntrada.size()>0 && !dateEntrada.get(0).isEmpty())
 		{ 
 		String fileName = dateEntrada.get(0);
 		 System.out.println(fileName);
-		 C = new CollectionSQL();
+		 C = new CollectionXLS();
 		 C.Leer_Archivo_Excel(fileName);
 		}
 		else

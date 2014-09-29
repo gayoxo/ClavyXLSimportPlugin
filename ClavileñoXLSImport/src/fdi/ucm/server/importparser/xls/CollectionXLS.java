@@ -38,14 +38,14 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  * @author Joaquin Gayoso-Cabada
  *
  */
-public class CollectionSQL implements InterfaceXLSparser {
+public class CollectionXLS implements InterfaceXLSparser {
 
 
 	private static final String XLS_COLLECTION = "XLS COllection";
 	private static final String COLECCION_A_APARTIR_DE_UN_XLS = "Coleccion a partir de un XLS";
 	private CompleteCollection coleccionstatica;
 	
-	public CollectionSQL() {
+	public CollectionXLS() {
 		coleccionstatica=new CompleteCollection(XLS_COLLECTION, COLECCION_A_APARTIR_DE_UN_XLS+ new Timestamp(new Date().getTime()));
 	}
 	
@@ -269,7 +269,7 @@ public class CollectionSQL implements InterfaceXLSparser {
 	
 	for (Hoja hoja : HojasEntrada) {
 		
-		System.out.println("Nombre: " + hoja.getName());
+//		System.out.println("Nombre: " + hoja.getName());
 		
 		CompleteGrammar Grammar=new CompleteGrammar(hoja.getName(), hoja.getName(), coleccionstatica);
 		coleccionstatica.getMetamodelGrammar().add(Grammar);
@@ -303,7 +303,7 @@ public class CollectionSQL implements InterfaceXLSparser {
 			    	 {
 			    	CompleteTextElementType C=generaStructura(Valor_de_celda,Grammar,HashPath);
 			    	Hash.put(new Integer(j), C);
-			    	System.out.print("Columna:" + Valor_de_celda + "\t\t");
+//			    	System.out.print("Columna:" + Valor_de_celda + "\t\t");
 			    	
 			    	 }
 			    
@@ -312,7 +312,7 @@ public class CollectionSQL implements InterfaceXLSparser {
 			    	CompleteTextElementType C=Hash.get(new Integer(j));
 			    	CompleteTextElement CT=new CompleteTextElement(C, Valor_de_celda);
 			    	Doc.getDescription().add(CT);
-			    	System.out.print("Valor:" + Valor_de_celda + "\t\t");
+//			    	System.out.print("Valor:" + Valor_de_celda + "\t\t");
 			    	}
 			 
 			   }
@@ -350,7 +350,7 @@ public class CollectionSQL implements InterfaceXLSparser {
 			    	 {
 			    	CompleteTextElementType C=generaStructura(Valor_de_celda,Grammar,HashPath);
 			    	Hash.put(new Integer(j), C);
-			    	System.out.print("Columna:" + Valor_de_celda + "\t\t");
+//			    	System.out.print("Columna:" + Valor_de_celda + "\t\t");
 			    	
 			    	 }
 			    else 
@@ -358,7 +358,7 @@ public class CollectionSQL implements InterfaceXLSparser {
 			    	CompleteTextElementType C=Hash.get(new Integer(j));
 			    	CompleteTextElement CT=new CompleteTextElement(C, Valor_de_celda);
 			    	Doc.getDescription().add(CT);
-			    	System.out.print("Valor:" + Valor_de_celda + "\t\t");
+//			    	System.out.print("Valor:" + Valor_de_celda + "\t\t");
 			    	
 			    	}
 			 
@@ -451,9 +451,10 @@ public class CollectionSQL implements InterfaceXLSparser {
 	 
 	  System.out.println(fileName);
 	 
-	 CollectionSQL C = new CollectionSQL();
+	 CollectionXLS C = new CollectionXLS();
 	 C.Leer_Archivo_Excel(fileName);
-	 C.toString();
+	 
+	 System.out.println(C.toString());
 	 }
 
 	@Override
