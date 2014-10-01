@@ -317,7 +317,7 @@ public class CollectionXLS implements InterfaceXLSparser {
 			 
 			   }
 			 
-			   System.out.println();
+//			   System.out.println();
 			 
 			  }
 		}
@@ -388,7 +388,7 @@ public class CollectionXLS implements InterfaceXLSparser {
 				return preproducido;
 		 
 		 
-		String[] pathL=valor_de_celda.split("\\\\");
+		String[] pathL=valor_de_celda.split("/");
 		
 		CompleteStructure Padre=null;
 		
@@ -418,7 +418,7 @@ public class CollectionXLS implements InterfaceXLSparser {
 		CompleteTextElementType Padre = null;
 		for (int i = 0; i < pathL.length-1; i++) {
 			if (i!=0)
-				Acumulado=Acumulado+"\\"+pathL[i];
+				Acumulado=Acumulado+"/"+pathL[i];
 			else
 				Acumulado=Acumulado+pathL[i];
 			CompleteTextElementType yo = hashPath.get(Acumulado);
@@ -447,7 +447,7 @@ public class CollectionXLS implements InterfaceXLSparser {
 
 	public static void main(String[] args) {
 	 
-	  String fileName = "ejemplo2.xlsx";
+	  String fileName = "ejemplo2.xls";
 	 
 	  System.out.println(fileName);
 	 
