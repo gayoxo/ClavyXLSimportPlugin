@@ -51,7 +51,7 @@ public class LoadCollectionXLS extends LoadCollection{
 		if (Parametros==null)
 		{
 			ArrayList<ImportExportPair> ListaCampos=new ArrayList<ImportExportPair>();
-			ListaCampos.add(new ImportExportPair(ImportExportDataEnum.File, "XLS File :"));
+			ListaCampos.add(new ImportExportPair(ImportExportDataEnum.File, "Upload XLS File :"));
 			Parametros=ListaCampos;
 			return ListaCampos;
 		}
