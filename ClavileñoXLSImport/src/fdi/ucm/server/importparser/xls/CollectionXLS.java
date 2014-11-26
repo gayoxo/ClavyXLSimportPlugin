@@ -91,14 +91,6 @@ public class CollectionXLS implements InterfaceXLSparser {
 	 
 	  }
 	 
-	  /**
-	 
-	   * Llama el metodo Imprimir_Consola para imprimir los datos de la celda
-	 
-	   * en la consola.
-	 
-	   */
-	 
 	  Imprimir_Consola(Hojas);
 	 
 	 }
@@ -294,13 +286,32 @@ public class CollectionXLS implements InterfaceXLSparser {
 			 
 			 
 			     HSSFCell hssfCell = Lista_celda_temporal.get(j);
-			 
-			     Valor_de_celda = hssfCell.toString();
+			    
+			     if(hssfCell.getCellType() == Cell.CELL_TYPE_FORMULA){
+			    	 switch(hssfCell.getCachedFormulaResultType()) {
+			            case Cell.CELL_TYPE_NUMERIC:
+			                System.out.println("Last evaluated as: " + hssfCell.getNumericCellValue());
+			                Valor_de_celda=Double.toString(hssfCell.getNumericCellValue());
+			                break;
+			            case Cell.CELL_TYPE_STRING:
+			                System.out.println("Last evaluated as \"" + hssfCell.getRichStringCellValue() + "\"");
+			                Valor_de_celda=hssfCell.getRichStringCellValue().toString();
+			                break;
+			             default:
+			                Valor_de_celda=hssfCell.getRichStringCellValue().toString();
+					        break;
+			                	
+			        }
+			     }else
+			    	 Valor_de_celda = hssfCell.toString();
 			 
 			 
 			 
 			    if (i==0)
 			    	 {
+			    	if (Valor_de_celda==null||Valor_de_celda.isEmpty())
+			    		Valor_de_celda=hoja.getName()+" Columna:"+j;
+			    	
 			    	CompleteTextElementType C=generaStructura(Valor_de_celda,Grammar,HashPath);
 			    	Hash.put(new Integer(j), C);
 //			    	System.out.print("Columna:" + Valor_de_celda + "\t\t");
@@ -344,10 +355,28 @@ public class CollectionXLS implements InterfaceXLSparser {
 			 
 			     XSSFCell hssfCell = (XSSFCell) Lista_celda_temporal.get(j);
 			 
-			     Valor_de_celda = hssfCell.toString();
+			     if(hssfCell.getCellType() == Cell.CELL_TYPE_FORMULA){
+			    	 switch(hssfCell.getCachedFormulaResultType()) {
+			            case Cell.CELL_TYPE_NUMERIC:
+			                System.out.println("Last evaluated as: " + hssfCell.getNumericCellValue());
+			                Valor_de_celda=Double.toString(hssfCell.getNumericCellValue());
+			                break;
+			            case Cell.CELL_TYPE_STRING:
+			                System.out.println("Last evaluated as \"" + hssfCell.getRichStringCellValue() + "\"");
+			                Valor_de_celda=hssfCell.getRichStringCellValue().toString();
+			                break;
+			             default:
+			                Valor_de_celda=hssfCell.getRichStringCellValue().toString();
+					        break;
+			                	
+			        }
+			     }else
+			    	 Valor_de_celda = hssfCell.toString();
 			 
 			    if (i==0)
 			    	 {
+			    	if (Valor_de_celda==null||Valor_de_celda.isEmpty())
+			    		Valor_de_celda=hoja.getName()+" Columna:"+j;
 			    	CompleteTextElementType C=generaStructura(Valor_de_celda,Grammar,HashPath);
 			    	Hash.put(new Integer(j), C);
 //			    	System.out.print("Columna:" + Valor_de_celda + "\t\t");
