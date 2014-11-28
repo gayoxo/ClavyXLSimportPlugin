@@ -321,6 +321,12 @@ public class CollectionXLS implements InterfaceXLSparser {
 			    else 
 			    	{
 			    	CompleteTextElementType C=Hash.get(new Integer(j));
+			    	if (C==null)
+		    		{
+			    	String Valor_de_celdaT = hoja.getName()+" Columna:"+j;
+			    	C=generaStructura(Valor_de_celdaT,Grammar,HashPath);
+			    	Hash.put(new Integer(j), C);
+		    		}
 			    	CompleteTextElement CT=new CompleteTextElement(C, Valor_de_celda);
 			    	Doc.getDescription().add(CT);
 //			    	System.out.print("Valor:" + Valor_de_celda + "\t\t");
@@ -385,6 +391,12 @@ public class CollectionXLS implements InterfaceXLSparser {
 			    else 
 			    	{
 			    	CompleteTextElementType C=Hash.get(new Integer(j));
+			    	if (C==null)
+			    		{
+				    	String Valor_de_celdaT = hoja.getName()+" Columna:"+j;
+				    	C=generaStructura(Valor_de_celdaT,Grammar,HashPath);
+				    	Hash.put(new Integer(j), C);
+			    		}
 			    	CompleteTextElement CT=new CompleteTextElement(C, Valor_de_celda);
 			    	Doc.getDescription().add(CT);
 //			    	System.out.print("Valor:" + Valor_de_celda + "\t\t");
