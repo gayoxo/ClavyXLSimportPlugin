@@ -276,7 +276,7 @@ public class CollectionXLS implements InterfaceXLSparser {
 			 
 			  for (int i = 0; i < Datos_celdas.size(); i++) {
 			 
-				CompleteDocuments Doc=new CompleteDocuments(coleccionstatica, Grammar, Integer.toString(i), "");  
+				CompleteDocuments Doc=new CompleteDocuments(coleccionstatica, Integer.toString(i), "");  
 				if (i!=0)
 					coleccionstatica.getEstructuras().add(Doc);
 				  
@@ -351,7 +351,7 @@ public class CollectionXLS implements InterfaceXLSparser {
 			 
 				  List<XSSFCell> Lista_celda_temporal = Datos_celdas.get(i);
 				  
-				  CompleteDocuments Doc=new CompleteDocuments(coleccionstatica, Grammar, Integer.toString(i), "");  
+				  CompleteDocuments Doc=new CompleteDocuments(coleccionstatica, Integer.toString(i), "");  
 					if (i!=0)
 						coleccionstatica.getEstructuras().add(Doc);
 			 
