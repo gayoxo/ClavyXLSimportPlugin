@@ -14,8 +14,8 @@ import fdi.ucm.server.importparser.xls.struture.HojaNueva;
 import fdi.ucm.server.modelComplete.collection.CompleteCollection;
 import fdi.ucm.server.modelComplete.collection.document.CompleteDocuments;
 import fdi.ucm.server.modelComplete.collection.document.CompleteTextElement;
+import fdi.ucm.server.modelComplete.collection.grammar.CompleteElementType;
 import fdi.ucm.server.modelComplete.collection.grammar.CompleteGrammar;
-import fdi.ucm.server.modelComplete.collection.grammar.CompleteStructure;
 import fdi.ucm.server.modelComplete.collection.grammar.CompleteTextElementType;
 
 import java.io.FileInputStream;
@@ -372,7 +372,7 @@ public class CollectionXLS implements InterfaceXLSparser {
 			                Valor_de_celda=hssfCell.getRichStringCellValue().toString();
 			                break;
 			             default:
-			                Valor_de_celda=hssfCell.getRichStringCellValue().toString();
+			            	 Valor_de_celda = hssfCell.toString();
 					        break;
 			                	
 			        }
@@ -431,7 +431,7 @@ public class CollectionXLS implements InterfaceXLSparser {
 		 
 		String[] pathL=valor_de_celda.split("/");
 		
-		CompleteStructure Padre=null;
+		CompleteElementType Padre=null;
 		
 		 if (pathL.length>1)
 			 Padre=producePadre(pathL,hashPath,grammar);
@@ -439,7 +439,7 @@ public class CollectionXLS implements InterfaceXLSparser {
 		 CompleteTextElementType Salida=null;
 		if (Padre!=null)
 		 {
-			Salida=new CompleteTextElementType(pathL[pathL.length-1], Padre);
+			Salida=new CompleteTextElementType(pathL[pathL.length-1], Padre, grammar);
 			Padre.getSons().add(Salida);
 		 }
 		else 
@@ -452,7 +452,7 @@ public class CollectionXLS implements InterfaceXLSparser {
 		return Salida;
 	}
 
-	private CompleteStructure producePadre(String[] pathL,
+	private CompleteElementType producePadre(String[] pathL,
 			HashMap<String, CompleteTextElementType> hashPath,CompleteGrammar CG) {
 		
 		String Acumulado = "";
@@ -468,7 +468,7 @@ public class CollectionXLS implements InterfaceXLSparser {
 				
 				if (Padre!=null)
 					{
-					CompleteTextElementType Salida = new CompleteTextElementType(pathL[i], Padre);
+					CompleteTextElementType Salida = new CompleteTextElementType(pathL[i], Padre , CG);
 					Padre.getSons().add(Salida);
 					hashPath.put(Acumulado, Salida);
 					}
