@@ -298,7 +298,7 @@ public class CollectionXLS implements InterfaceXLSparser {
 			                Valor_de_celda=hssfCell.getRichStringCellValue().toString();
 			                break;
 			             default:
-			                Valor_de_celda=hssfCell.getRichStringCellValue().toString();
+			            	Valor_de_celda = hssfCell.toString();
 					        break;
 			                	
 			        }
