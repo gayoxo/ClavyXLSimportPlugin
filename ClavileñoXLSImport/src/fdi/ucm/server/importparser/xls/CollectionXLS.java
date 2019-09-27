@@ -20,6 +20,7 @@ import fdi.ucm.server.modelComplete.collection.grammar.CompleteTextElementType;
 
 import java.io.FileInputStream;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
@@ -122,6 +123,7 @@ public class CollectionXLS implements InterfaceXLSparser {
 	   
 	   
 	   int NStilos=Libro_trabajo.getNumberOfSheets();
+	   int columProcess=0;
 		 
 	   for (int i = 0; i < NStilos; i++) {
 		   XSSFSheet Hoja_hssf = Libro_trabajo.getSheetAt(i);
@@ -131,23 +133,39 @@ public class CollectionXLS implements InterfaceXLSparser {
 			 
 		   List<List<XSSFCell>> Lista_Datos_Celda2 = new ArrayList<List<XSSFCell>>();
 		   
+		   boolean primera=true;
 		   while (Iterador_de_Fila.hasNext()) {
 		 
 			   XSSFRow Fila_hssf = (XSSFRow) Iterador_de_Fila.next();
+			   
+			   
+			   List<XSSFCell> Lista=new LinkedList<>();
+			   
 		 
-		    Iterator<Cell> iterador = Fila_hssf.cellIterator();
+			   if (primera)
+			    {
+				   Iterator<Cell> iterador = Fila_hssf.cellIterator();
+			    	while (iterador.hasNext()) {
+			    		XSSFCell Celda_hssf = (XSSFCell) iterador.next();
+			    		Lista.add(Celda_hssf);
+					 
+					    }
+			    	
+			    	columProcess=Lista.size();
+			    	
+			    	primera=false;
+			    }
+			    else
+			    {
+			    	for (int j = 0; j < columProcess; j++) {
+			    		XSSFCell Celda_hssf=Fila_hssf.getCell(j);
+			    		Lista.add(Celda_hssf);
+					}
+			    }
+			   
+
 		 
-		    List<XSSFCell> Lista_celda_temporal = new ArrayList<XSSFCell>();
-		 
-		    while (iterador.hasNext()) {
-		 
-		    	XSSFCell Celda_hssf = (XSSFCell) iterador.next();
-		 
-		     Lista_celda_temporal.add(Celda_hssf);
-		 
-		    }
-		 
-		    Lista_Datos_Celda2.add(Lista_celda_temporal);
+		    Lista_Datos_Celda2.add(Lista);
 		 
 		   }
 		   
@@ -199,7 +217,8 @@ public class CollectionXLS implements InterfaceXLSparser {
 	   HSSFWorkbook Libro_trabajo = new HSSFWorkbook(fsFileSystem);
 	   
 	   int NStilos=Libro_trabajo.getNumberOfSheets();
-	 
+	   int columProcess=0;
+	   
 	   for (int i = 0; i < NStilos; i++) {
 		   HSSFSheet Hoja_hssf = Libro_trabajo.getSheetAt(i);
 		   HojaAntigua Hojax=new HojaAntigua(Hoja_hssf.getSheetName());
@@ -208,23 +227,36 @@ public class CollectionXLS implements InterfaceXLSparser {
 			 
 		   List<List<HSSFCell>> Lista_Datos_Celda2 = new ArrayList<List<HSSFCell>>();
 		   
+		   boolean primera=true;
+		   
 		   while (Iterador_de_Fila.hasNext()) {
 		 
 		    HSSFRow Fila_hssf = (HSSFRow) Iterador_de_Fila.next();
 		 
-		    Iterator<Cell> iterador = Fila_hssf.cellIterator();
-		 
-		    List<HSSFCell> Lista_celda_temporal = new ArrayList<HSSFCell>();
-		 
-		    while (iterador.hasNext()) {
-		 
-		     HSSFCell Celda_hssf = (HSSFCell) iterador.next();
-		 
-		     Lista_celda_temporal.add(Celda_hssf);
-		 
+		    List<HSSFCell> Lista=new LinkedList<>();
+		    
+		    if (primera)
+		    {
+		    	 Iterator<Cell> iterador = Fila_hssf.cellIterator();
+		    	while (iterador.hasNext()) {
+		    		 HSSFCell Celda_hssf = (HSSFCell) iterador.next();
+		    		Lista.add(Celda_hssf);
+				 
+				    }
+		    	
+		    	columProcess=Lista.size();
+		    	primera=false;
 		    }
+		    else
+		    {
+		    	for (int j = 0; j < columProcess; j++) {
+		    		HSSFCell Celda_hssf=Fila_hssf.getCell(j);
+		    		Lista.add(Celda_hssf);
+				}
+		    }
+
 		 
-		    Lista_Datos_Celda2.add(Lista_celda_temporal);
+		    Lista_Datos_Celda2.add(Lista);
 		 
 		   }
 		   
@@ -267,12 +299,20 @@ public class CollectionXLS implements InterfaceXLSparser {
 		coleccionstatica.getMetamodelGrammar().add(Grammar);
 		HashMap<Integer, CompleteTextElementType> Hash=new HashMap<Integer, CompleteTextElementType>();
 		HashMap<String, CompleteTextElementType> HashPath=new HashMap<String, CompleteTextElementType>();
+		
+		 CompleteTextElementType Descripccion=null;
+		 CompleteTextElementType Icon=null;
+		
+		
+		
 		if (hoja instanceof HojaAntigua)
 		{
 			
 			List<List<HSSFCell>> Datos_celdas = ((HojaAntigua) hoja).getListaHijos();
 			
 			 String Valor_de_celda;
+			 
+			
 			 
 			  for (int i = 0; i < Datos_celdas.size(); i++) {
 			 
@@ -286,7 +326,14 @@ public class CollectionXLS implements InterfaceXLSparser {
 			 
 			 
 			     HSSFCell hssfCell = Lista_celda_temporal.get(j);
-			    
+			 
+			     
+			     Valor_de_celda="";
+				 
+				   if (Lista_celda_temporal.get(j)!=null)
+				   {
+			     
+			     
 			     if(hssfCell.getCellType() == Cell.CELL_TYPE_FORMULA){
 			    	 switch(hssfCell.getCachedFormulaResultType()) {
 			            case Cell.CELL_TYPE_NUMERIC:
@@ -316,6 +363,12 @@ public class CollectionXLS implements InterfaceXLSparser {
 			    	Hash.put(new Integer(j), C);
 //			    	System.out.print("Columna:" + Valor_de_celda + "\t\t");
 			    	
+			    	if (isDesscription(Valor_de_celda))
+			    		Descripccion=C;
+			    	
+			    	if (isIcon(Valor_de_celda))
+			    		Icon=C;
+
 			    	 }
 			    
 			    else 
@@ -330,8 +383,15 @@ public class CollectionXLS implements InterfaceXLSparser {
 			    	CompleteTextElement CT=new CompleteTextElement(C, Valor_de_celda);
 			    	Doc.getDescription().add(CT);
 //			    	System.out.print("Valor:" + Valor_de_celda + "\t\t");
+			    	
+			    	if (C==Descripccion)
+			    		Doc.setDescriptionText(Valor_de_celda);
+			    	
+			    	if (C==Icon)
+			    		Doc.setIcon(Valor_de_celda);
+			    	
 			    	}
-			 
+				   }
 			   }
 			 
 //			   System.out.println();
@@ -357,8 +417,10 @@ public class CollectionXLS implements InterfaceXLSparser {
 			 
 			   for (int j = 0; j < Lista_celda_temporal.size(); j++) {
 			 
-			  
+				   Valor_de_celda="";
 			 
+				   if (Lista_celda_temporal.get(j)!=null)
+				   {
 			     XSSFCell hssfCell = (XSSFCell) Lista_celda_temporal.get(j);
 			 
 			     if(hssfCell.getCellType() == Cell.CELL_TYPE_FORMULA){
@@ -387,6 +449,13 @@ public class CollectionXLS implements InterfaceXLSparser {
 			    	Hash.put(new Integer(j), C);
 //			    	System.out.print("Columna:" + Valor_de_celda + "\t\t");
 			    	
+			    	
+			    	if (isDesscription(Valor_de_celda))
+			    		Descripccion=C;
+			    	
+			    	if (isIcon(Valor_de_celda))
+			    		Icon=C;
+			    	
 			    	 }
 			    else 
 			    	{
@@ -401,8 +470,14 @@ public class CollectionXLS implements InterfaceXLSparser {
 			    	Doc.getDescription().add(CT);
 //			    	System.out.print("Valor:" + Valor_de_celda + "\t\t");
 			    	
+			    	if (C==Descripccion)
+			    		Doc.setDescriptionText(Valor_de_celda);
+			    	
+			    	if (C==Icon)
+			    		Doc.setIcon(Valor_de_celda);
+			    	
 			    	}
-			 
+			   }
 			   }
 			 
 			   System.out.println();
@@ -421,7 +496,37 @@ public class CollectionXLS implements InterfaceXLSparser {
 	 
 	 }
 	 
-	 private CompleteTextElementType generaStructura(String valor_de_celda, CompleteGrammar grammar, HashMap<String, CompleteTextElementType> hashPath) {
+	 private boolean isIcon(String valor_de_celda) {
+		 String comprara=valor_de_celda.trim().toLowerCase();
+
+		 List<String> IconText=new LinkedList<>();
+		 
+		 IconText.add("icon");
+		 IconText.add("ico");
+		
+		 
+		if (IconText.contains(comprara))
+			return true;
+		else
+			return false;
+	}
+
+	private boolean isDesscription(String valor_de_celda) {
+		 String comprara=valor_de_celda.trim().toLowerCase();
+
+		 List<String> DescrpitionText=new LinkedList<>();
+		 
+		 DescrpitionText.add("description");
+		 DescrpitionText.add("desc");
+		
+		 
+		if (DescrpitionText.contains(comprara))
+			return true;
+		else
+			return false;
+	}
+
+	private CompleteTextElementType generaStructura(String valor_de_celda, CompleteGrammar grammar, HashMap<String, CompleteTextElementType> hashPath) {
 		 
 		
 		 CompleteTextElementType preproducido = hashPath.get(valor_de_celda);
