@@ -17,15 +17,14 @@ import fdi.ucm.server.modelComplete.collection.grammar.CompleteElementType;
 import fdi.ucm.server.modelComplete.collection.grammar.CompleteGrammar;
 import fdi.ucm.server.modelComplete.collection.grammar.CompleteTextElementType;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
-import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
-
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.usermodel.Cell;
@@ -33,8 +32,10 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+
 
 /**
  * Clase que implementa la creacion de la base de datos per se
@@ -88,14 +89,15 @@ public class CollectionXLS implements InterfaceXLSparser {
 		 try {
 
 			 JSONParser parser = new JSONParser();
+
+			 Object obj = parser.parse(new FileReader(fileNameP));
+					 
+			 JSONArray jsonObject = (JSONArray) obj;
 			 
-			 Object objA = parser.parse(new FileReader("E:\\json.txt"));
-			 
-			 JSONArray obj = new JSONArray(new FileReader(fileNameP));
-			 for (int i = 0; i < obj.length(); i++) {
-				JSONObject array_element = (JSONObject) obj.get(i);
-				String Gram=array_element.getString("g");
-				String COL_S=array_element.getString("c");
+			 for (int i = 0; i < jsonObject.size(); i++) {
+				JSONObject array_element = (JSONObject) jsonObject.get(i);
+				String Gram=array_element.get("g").toString();
+				String COL_S=array_element.get("c").toString();
 				
 				if (Gram!=null&&COL_S!=null&&Gram.trim().length()>0&&COL_S.trim().length()>0)
 					{
@@ -328,7 +330,7 @@ public class CollectionXLS implements InterfaceXLSparser {
 		    		Valor_de_celda=hoja.getName()+" Columna:"+j;
 		    	
 		    	if (linkElements.get(hoja.getName()) != null&&linkElements.get(hoja.getName()).contains(new Integer(j)))
-		    		System.out.println(j+"->> Deberia ser un Link");
+		    		System.out.println(j+":"+Valor_de_celda+"->> Deberia ser un Link");
 		    	
 		    	CompleteTextElementType C=generaStructura(Valor_de_celda,Grammar,HashPath);
 		    	Hash.put(new Integer(j), C);
