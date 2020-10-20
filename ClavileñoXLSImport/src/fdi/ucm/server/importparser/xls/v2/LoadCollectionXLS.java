@@ -4,10 +4,13 @@
 package fdi.ucm.server.importparser.xls.v2;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import javax.management.RuntimeErrorException;
 
 import fdi.ucm.server.modelComplete.ImportExportDataEnum;
 import fdi.ucm.server.modelComplete.ImportExportPair;
 import fdi.ucm.server.modelComplete.LoadCollection;
+import fdi.ucm.server.modelComplete.collection.CompleteCollection;
 import fdi.ucm.server.modelComplete.collection.CompleteCollectionAndLog;
 
 /**
@@ -17,6 +20,7 @@ import fdi.ucm.server.modelComplete.collection.CompleteCollectionAndLog;
 public class LoadCollectionXLS extends LoadCollection{
 
 	private static ArrayList<ImportExportPair> Parametros;
+	private CompleteCollection PreCol;
 	
 	
 	public LoadCollectionXLS() {
@@ -32,10 +36,24 @@ public class LoadCollectionXLS extends LoadCollection{
 		if (dateEntrada.size()>0 && !dateEntrada.get(0).isEmpty())
 		{ 
 		String fileName = dateEntrada.get(0);
-		String fileNameP = dateEntrada.get(1);
+		
+		String fileNameP="";
+		if (dateEntrada.size()>1)
+			fileNameP= dateEntrada.get(1);
+		
+		Character Columns='0';
+		if (dateEntrada.size()>2)
+			{
+			Columns= dateEntrada.get(2).charAt(0);
+			}
+		
 		 System.out.println(fileName);
 		 C = new CollectionXLS();
-		 C.Leer_Archivo_Excel(fileName,fileNameP);
+
+
+		 
+		 
+		 C.Leer_Archivo_Excel(fileName,fileNameP,PreCol,Log,Columns);
 		}
 		else
 		{
@@ -44,7 +62,10 @@ public class LoadCollectionXLS extends LoadCollection{
 			if (dateEntrada.get(0).isEmpty()) 
 				Log.add("Error: Path del file vacio");
 		}
+		if (C.getColeccion()!=null)
 		 return new CompleteCollectionAndLog(C.getColeccion(),Log);
+		else
+			throw new RuntimeErrorException(new Error(Arrays.toString(Log.toArray())));
 	}
 
 	@Override
@@ -54,6 +75,7 @@ public class LoadCollectionXLS extends LoadCollection{
 			ArrayList<ImportExportPair> ListaCampos=new ArrayList<ImportExportPair>();
 			ListaCampos.add(new ImportExportPair(ImportExportDataEnum.File, "Upload XLS File :"));
 			ListaCampos.add(new ImportExportPair(ImportExportDataEnum.File, "Upload .json (Cross-Relation File) :",true));
+			ListaCampos.add(new ImportExportPair(ImportExportDataEnum.Text, "Column letter in excel for description :",true));
 			Parametros=ListaCampos;
 			return ListaCampos;
 		}
@@ -70,4 +92,13 @@ public class LoadCollectionXLS extends LoadCollection{
 		return false;
 	}
 
+	@Override
+	public boolean needComplete() {
+		return true;
+	}
+	
+	@Override
+	public void setcompleteCollectionPre(CompleteCollection pre) {
+		PreCol=pre;
+	}
 }
