@@ -653,7 +653,7 @@ public class CollectionXLS implements InterfaceXLSparser {
 
 			    	        	 }
 							} catch (Exception e) {
-								System.out.println("Not number Not Found");
+								System.out.println("Generar una Persona");
 							}
 		    	        }
 		    	        
@@ -682,6 +682,8 @@ public class CollectionXLS implements InterfaceXLSparser {
 	 
 	 
 	 }
+	 
+	 
 	 
 	 private boolean isIcon(String valor_de_celda) {
 		 String comprara=valor_de_celda.trim().toLowerCase();
