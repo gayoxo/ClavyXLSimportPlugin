@@ -510,6 +510,18 @@ public class CollectionXLS implements InterfaceXLSparser {
 			  CompleteLinkElementType CL=new CompleteLinkElementType(C.getName(),C.getFather(), C.getCollectionFather());
 			  CL.setSons(C.getSons());
 			  
+			  if (C.getFather()==null)
+				  {
+				  C.getCollectionFather().getSons().add(CL);
+				  C.getCollectionFather().getSons().remove(C);
+				  }
+			  else
+			  {
+				  C.getFather().getSons().add(CL);
+				  C.getFather().getSons().remove(C);
+				  }
+			  
+			  
 			  Hash.remove(new Integer(j));
 			  HashL.put(new Integer(j), CL);
 			  
