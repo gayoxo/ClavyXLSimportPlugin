@@ -31,6 +31,7 @@ import java.io.ObjectOutputStream;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map.Entry;
 
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
@@ -136,13 +137,21 @@ public class CollectionXLS implements InterfaceXLSparser {
 	 
 	  */
 	 public void Leer_Archivo_Excel(String Nombre_Archivo, String fileNameP,
-			 CompleteCollection preCol, List<String> log, Character columns) {
+			 CompleteCollection preCol, List<String> log, String columns) {
 	 
 	  /**
 	 
 	   * Crea una nueva instancia de Lista_Datos_Celda
 	 
 	   */
+		 Integer ColDesc=-1;
+		 
+		 if (columns!=null)
+			 ColDesc=calculaColumnaIntArray(columns);
+		 
+
+		 
+		 
 		 
 		 HashSet<Long> Destinos=new HashSet<Long>();
 		
@@ -173,10 +182,9 @@ public class CollectionXLS implements InterfaceXLSparser {
 					
 					if (Gram!=null&&COL_S!=null&&Gram.trim().length()>0&&COL_S.trim().length()>0&&DES_ID>0&&FuzzyI>0)
 						{
+
 						
-						
-						Character COL_C=COL_S.toUpperCase().charAt(0);
-						Integer I = ((int)(COL_C)) - ((int)(new Character('A')));
+						Integer I = calculaColumnaIntArray(COL_S.toUpperCase());
 						
 						HashMap<Integer, Dest_Por> listaPre= LinkElements.get(Gram);
 						if (listaPre==null)
@@ -237,7 +245,7 @@ public class CollectionXLS implements InterfaceXLSparser {
 			 else if (Nombre_Archivo.contains(".xls")) 
 				  Hojas=GENERAR(Nombre_Archivo,FileFormat.OLD);
 
-			  Imprimir_Consola(Hojas,LinkElements,index,analyzer,Destinos,ListaHash);
+			  Imprimir_Consola(Hojas,LinkElements,index,analyzer,Destinos,ListaHash,log,Nombre_Archivo,ColDesc);
 			 
 			
 		} catch (Exception e) {
@@ -254,7 +262,32 @@ public class CollectionXLS implements InterfaceXLSparser {
 	 
 	 }
 	 
-	 private void procesaGramarHash(List<CompleteGrammar> metamodelGrammar,
+	 private Integer calculaColumnaIntArray(String columns) {
+		return calculaColumnaIntAbs(columns)-1;
+	}
+
+	private int calculaColumnaIntAbs(String columns) {
+		 Integer Final=0;
+		    
+		    int BaseZ = 26;
+		    
+		    for (int j=0; j<columns.toUpperCase().length();j++)
+		    {
+		        int pos = columns.toUpperCase().length()-1-j;
+		        char charar = columns.toUpperCase().charAt(pos);
+		        
+		        Integer I = ((int)(new Character(charar))) - ((int)(new Character('A')))+1;
+		        
+		        
+		       double Var = Math.pow(BaseZ, pos)*I;
+
+		        Final=Final+(int)Var;
+		    }
+		    
+		    return Final;
+	}
+
+	private void procesaGramarHash(List<CompleteGrammar> metamodelGrammar,
 			 HashMap<Long, Long> listSyme, HashSet<Long> destinos) {
 		for (CompleteGrammar completeGrammar : metamodelGrammar) 
 			procesaStructureHash(completeGrammar.getSons(),listSyme,destinos);
@@ -406,6 +439,8 @@ public class CollectionXLS implements InterfaceXLSparser {
 	 * @param index 
 	 * @param analyzer 
 	 * @param destinos 
+	 * @param colDesc 
+	 * @param preCol,List<StringS> LogsOut 
 	 * @param listaHash 
 	 
 	  *
@@ -420,7 +455,8 @@ public class CollectionXLS implements InterfaceXLSparser {
 	 private void Imprimir_Consola(List<Hoja> HojasEntrada,
 			 HashMap<String, HashMap<Integer,Dest_Por>> linkElements,
 			 Directory index, StandardAnalyzer analyzer, HashSet<Long> destinos,
-			 HashMap<Long, CompleteDocuments> listaDocumento) throws IOException {
+			 HashMap<Long, CompleteDocuments> listaDocumento, List<String> LogsOut,
+			 String Filename, Integer colDesc) throws IOException {
 	 
 		 
 	
@@ -429,7 +465,7 @@ public class CollectionXLS implements InterfaceXLSparser {
 //		System.out.println("Nombre: " + hoja.getName());
 		
 		
-		CompleteGrammar Grammar=new CompleteGrammar(hoja.getName(), hoja.getName(), coleccionstatica);
+		CompleteGrammar Grammar=new CompleteGrammar(hoja.getName(), Filename, coleccionstatica);
 		coleccionstatica.getMetamodelGrammar().add(Grammar);
 		HashMap<Integer, CompleteTextElementType> Hash=new HashMap<Integer, CompleteTextElementType>();
 		HashMap<Integer, CompleteLinkElementType> HashL=new HashMap<Integer, CompleteLinkElementType>();
@@ -490,7 +526,7 @@ public class CollectionXLS implements InterfaceXLSparser {
 			    	Hash.put(new Integer(j), C);
 //			    	System.out.print("Columna:" + Valor_de_celda + "\t\t");
 			    	
-			    	if (isDesscription(Valor_de_celda))
+			    	if (colDesc==j||isDesscription(Valor_de_celda))
 			    		Descripccion=C;
 			    	
 			    	if (isIcon(Valor_de_celda))
@@ -502,34 +538,48 @@ public class CollectionXLS implements InterfaceXLSparser {
 			   
 		   }	
 		  
+		  
+		  HashMap<Long, CompleteLinkElementType> listaNewLinks=new HashMap<Long, CompleteLinkElementType>();
+		  
 		  for (int j = 0; j < Lista_celda_temporal0.size(); j++) 
 		  if (linkElements.get(hoja.getName()) != null&&linkElements.get(hoja.getName()).containsKey(new Integer(j)))
 	    		{
 			  CompleteTextElementType C=Hash.get(new Integer(j));
 			  
-			  CompleteLinkElementType CL=new CompleteLinkElementType(C.getName(),C.getFather(), C.getCollectionFather());
+			  Dest_Por destinosLoca = linkElements.get(hoja.getName()).get(new Integer(j));
+			  
+			  if (listaNewLinks.get(destinosLoca.getDestino())!=null)
+			  {
+				  HashL.put(new Integer(j), listaNewLinks.get(destinosLoca.getDestino()));
+			  }
+			  else
+			  {
+			  
+			  CompleteLinkElementType CL=new CompleteLinkElementType("LINKED",C.getFather(), C.getCollectionFather());
 			  CL.setSons(C.getSons());
 			  
 			  if (C.getFather()==null)
-				  {
 				  C.getCollectionFather().getSons().add(CL);
-				  C.getCollectionFather().getSons().remove(C);
-				  }
 			  else
-			  {
 				  C.getFather().getSons().add(CL);
-				  C.getFather().getSons().remove(C);
-				  }
+
+			  listaNewLinks.put(destinosLoca.getDestino(), CL);
 			  
-			  
-			  Hash.remove(new Integer(j));
+//			  Hash.remove(new Integer(j));
 			  HashL.put(new Integer(j), CL);
-			  
 			  System.out.println(j+":"+CL.getName()+"->> Deberia ser un Link");
+			  }
+			  
+			 
 	    	
 	    		}
-		 
-		 
+			 
+			 
+		  HashMap<String,List<CompleteLinkElement>> NuevasPersonas=new  HashMap<String,List<CompleteLinkElement>>();
+		  
+		  CompleteDocuments DocAUX=new CompleteDocuments(null, "aux", "aux");  
+		  
+		  
 		  for (int i = 1; i < Datos_celdas.size(); i++) {
 		 
 			CompleteDocuments Doc=new CompleteDocuments(coleccionstatica, Integer.toString(i), "");  
@@ -538,7 +588,8 @@ public class CollectionXLS implements InterfaceXLSparser {
 			  
 		   List<Cell> Lista_celda_temporal = Datos_celdas.get(i);
 		 
-	
+			  HashMap<CompleteLinkElementType, List<String>> searchPatern = new HashMap<CompleteLinkElementType, List<String>>();
+
 		   
 		   for (int j = 0; j < Lista_celda_temporal.size(); j++) {
 		 
@@ -574,18 +625,13 @@ public class CollectionXLS implements InterfaceXLSparser {
 
 		    	CompleteTextElementType C=Hash.get(new Integer(j));
 		    	
-//		    	if (C==null)
-//	    		{
-//		    	String Valor_de_celdaT = hoja.getName()+" Columna:"+j;
-//		    	C=generaStructura(Valor_de_celdaT,Grammar,HashPath);
-//		    	Hash.put(new Integer(j), C);
-//	    		}
+
 		    	
 		    	if (C!=null)
 		    	{
 		    	CompleteTextElement CT=new CompleteTextElement(C, Valor_de_celda);
 		    	Doc.getDescription().add(CT);
-//		    	System.out.print("Valor:" + Valor_de_celda + "\t\t");
+
 		    	
 		    	if (C==Descripccion)
 		    		Doc.setDescriptionText(Valor_de_celda);
@@ -593,86 +639,28 @@ public class CollectionXLS implements InterfaceXLSparser {
 		    	if (C==Icon)
 		    		Doc.setIcon(Valor_de_celda);
 		    	}
-		    	else
-		    	{
+
 		    		CompleteLinkElementType C2=HashL.get(new Integer(j));
 		    		if (C2!=null)
 			    	{
-		    			BooleanQuery.Builder builder = new BooleanQuery.Builder();
-		    			
-		    			for (Long long1 : destinos) {
-		    				Query q0 = new FuzzyQuery(new Term("C"+long1, Valor_de_celda));
-		    				builder.add(q0, 
-		    						org.apache.lucene.search.BooleanClause.Occur.SHOULD);
-		    			}
-	
-//		    			builder.add(name, BooleanClause.Occur.SHOULD);
-//		    			builder.add(name, BooleanClause.Occur.SHOULD);
 		    			
 		    			
+		    			List<String> listaA=searchPatern.get(C2);
 		    			
-		    			Query q = builder.build();
+		    			if (listaA==null)
+		    				listaA=new ArrayList<String>();
+		    			
+		    			listaA.add(Valor_de_celda);
+		    			
+		    			searchPatern.put(C2, listaA);
 		    			
 		    			
-		    			//A
-//		    			Query q = new FuzzyQuery(new Term("C"+destinos.toArray()[0], Valor_de_celda));
 		    			
-		    			//B
-//		    			SpanQuery[] clauses = new SpanQuery[destinos.size()];
-//		    			int iTi=0;
-//		    			for (Long long1 : destinos) {
-//		    				
-//		    				if (Valor_de_celda.equals("Parellada"))
-//		    					System.out.println("yes");
-//		    				
-//		    				clauses[iTi] = new SpanMultiTermQueryWrapper(new FuzzyQuery(new Term("C"+long1, Valor_de_celda)));
-//		    				iTi++;
-//		    				
-//						}
-//
-//		    			
-//		    			Query q = new SpanNearQuery(clauses, 0, true);
-
-
-		    	        TopDocs docs = searcher.search(q, hitsPerPage);
-		    	        
-		    	        
-		    	        
-		    	        ScoreDoc[] hits = docs.scoreDocs;
-		    	        
-		    	        System.out.println("Found " + hits.length + " hits. for ->"+ Valor_de_celda);
-		    	        
-		    	        if (hits.length>0)
-		    	        {
-		    	        	 int docId = hits[0].doc;
-		    	        	 Document d = searcher.doc(docId);
-		    	        	 Long LL=Long.parseLong(d.get("CID"));
-		    	        	 
-		    	        	 if (listaDocumento.get(LL)!=null)
-		    	        	 {
-		    	        	 CompleteLinkElement CT=new CompleteLinkElement(C2, listaDocumento.get(LL));
-		 			    	Doc.getDescription().add(CT);
-
-		    	        	 }
-		    	        }else
-		    	        {
-		    	        	try {
-		    	        		Long LL = Long.parseLong(Valor_de_celda);
-		    	        		 if (listaDocumento.get(LL)!=null)
-			    	        	 {
-			    	        	 CompleteLinkElement CT=new CompleteLinkElement(C2, listaDocumento.get(LL));
-			 			    	Doc.getDescription().add(CT);
-
-			    	        	 }
-							} catch (Exception e) {
-								System.out.println("Generar una Persona");
-							}
-		    	        }
-		    	        
+		    			
 		    	        
 		    			
 		    	
-			    	}
+			    	
 		    	}
 		    	
 			   }
@@ -680,13 +668,139 @@ public class CollectionXLS implements InterfaceXLSparser {
 			   
 		   }
 		   
-		 
-//		   System.out.println();
+		 //AQUIN
+		   
+		   for (Entry<CompleteLinkElementType, List<String>> C2_val : searchPatern.entrySet()) {
+			   BooleanQuery.Builder builder = new BooleanQuery.Builder();
+				
+				for (Long long1 : destinos) {
+					
+					for (String valor : C2_val.getValue()) {
+						Query q0 = new FuzzyQuery(new Term("C"+long1, valor));
+						builder.add(q0, 
+								org.apache.lucene.search.BooleanClause.Occur.SHOULD);
+					}
+					
+					
+				}
+
+				
+				
+				StringBuffer nameCOmplete=new StringBuffer();
+				boolean af=true;
+				for (String long1 : C2_val.getValue()) 
+					{
+					
+					if (af)
+						af=false;
+					else
+						nameCOmplete.append(", ");
+						
+					nameCOmplete.append(long1);
+					
+					}
+				
+
+				
+				Query q = builder.build();
+				
+				
+
+
+		        TopDocs docs = searcher.search(q, hitsPerPage);
+		        
+		        
+		        
+		        ScoreDoc[] hits = docs.scoreDocs;
+		        
+		       // System.out.println("Found " + hits.length + " hits. for ->"+ Arrays.toString(C2_val.getValue().toArray()));
+		        
+		        if (hits.length>0)
+		        {
+		        	 int docId = hits[0].doc;
+		        	 Document d = searcher.doc(docId);
+		        	 Long LL=Long.parseLong(d.get("CID"));
+		        	 
+		        	 if (listaDocumento.get(LL)!=null)
+		        	 {
+		        		CompleteDocuments DocuLin = listaDocumento.get(LL); 
+		        	 CompleteLinkElement CT=new CompleteLinkElement(C2_val.getKey(), listaDocumento.get(LL));
+			    	Doc.getDescription().add(CT);
+
+			    	LogsOut.add("LINKED:"+nameCOmplete.toString()+" LINKED to ->> D:"+DocuLin.getClavilenoid()+" "+DocuLin.getDescriptionText());
+			    	
+		        	 }
+		        }else
+		        {
+		        	if (C2_val.getValue().size()==1)
+			        	try {
+			        		
+			        		Long LL = Long.parseLong(C2_val.getValue().get(0));
+			        		 if (listaDocumento.get(LL)!=null)
+		   	        	 {
+		   	        	 CompleteLinkElement CT=new CompleteLinkElement(C2_val.getKey(), listaDocumento.get(LL));
+					    	Doc.getDescription().add(CT);
+	
+		   	        	 }
+						} catch (Exception e) {
+							
+							 CompleteLinkElement CT=new CompleteLinkElement(C2_val.getKey(), DocAUX);
+						    	Doc.getDescription().add(CT);
+						    	
+							List<CompleteLinkElement> ListaElemdoc = NuevasPersonas.get(nameCOmplete.toString());
+							if (ListaElemdoc==null)
+								ListaElemdoc=new ArrayList<CompleteLinkElement>();
+							
+							ListaElemdoc.add(CT);
+							
+							NuevasPersonas.put(nameCOmplete.toString(), ListaElemdoc);
+							
+						}
+		        	else
+		        		{
+		        		 CompleteLinkElement CT=new CompleteLinkElement(C2_val.getKey(), DocAUX);
+					    	Doc.getDescription().add(CT);
+					    	
+						List<CompleteLinkElement> ListaElemdoc = NuevasPersonas.get(nameCOmplete.toString());
+						if (ListaElemdoc==null)
+							ListaElemdoc=new ArrayList<CompleteLinkElement>();
+						
+						ListaElemdoc.add(CT);
+						
+						NuevasPersonas.put(nameCOmplete.toString(), ListaElemdoc);
+		        		}
+		        }
+		}
+		   
+
 		 
 		  }
 		 
-		
-		
+		  if (NuevasPersonas.size()>0)
+		  {
+			  CompleteGrammar GrammarPP=new CompleteGrammar("CREATED", Filename, coleccionstatica);
+				coleccionstatica.getMetamodelGrammar().add(GrammarPP);
+				
+				CompleteTextElementType Nombre =new CompleteTextElementType("VALUE", GrammarPP);
+				GrammarPP.getSons().add(Nombre);
+				
+		  for (Entry<String, List<CompleteLinkElement>> doccrea : NuevasPersonas.entrySet()) {
+			  LogsOut.add("CREATED:"+doccrea.getKey()+" CREATED");
+			  
+			  CompleteDocuments Doc=new CompleteDocuments(coleccionstatica, doccrea.getKey(), "");  
+			  coleccionstatica.getEstructuras().add(Doc);
+			  CompleteTextElement tete=new CompleteTextElement(Nombre, doccrea.getKey());
+			  Doc.getDescription().add(tete);
+			  
+			  for (CompleteLinkElement linkvaria : doccrea.getValue()) {
+				  linkvaria.setValue(Doc);
+			}
+	        	
+	        	
+	        	
+	        	
+			}
+		  }
 		
 	}	 
 		 
@@ -822,11 +936,17 @@ public class CollectionXLS implements InterfaceXLSparser {
 	  
 	  System.out.println(fileNameP);
 	 
+	  ArrayList<String> Logs = new ArrayList<String>();
+	  
 	 CollectionXLS C = new CollectionXLS();
 	 C.Leer_Archivo_Excel(fileName,fileNameP,
-			 fileNameCP, new ArrayList<String>(),'A');
+			 fileNameCP,Logs,"C");
 	 
 	 System.out.println(C.toString());
+	 
+	 for (String string : Logs) {
+		 System.out.println(string);
+	}
 	 
 	 try {
 			String FileIO = System.getProperty("user.home")+File.separator+System.currentTimeMillis()+".clavy";

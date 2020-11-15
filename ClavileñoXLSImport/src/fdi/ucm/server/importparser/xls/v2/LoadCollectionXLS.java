@@ -41,10 +41,10 @@ public class LoadCollectionXLS extends LoadCollection{
 		if (dateEntrada.size()>1)
 			fileNameP= dateEntrada.get(1);
 		
-		Character Columns='0';
+		String Columns=null;
 		if (dateEntrada.size()>2)
 			{
-			Columns= dateEntrada.get(2).charAt(0);
+			Columns= dateEntrada.get(2);
 			}
 		
 		 System.out.println(fileName);
