@@ -84,7 +84,7 @@ public class LoadCollectionXLS extends LoadCollection{
 
 	@Override
 	public String getName() {
-		return "XLS V2";
+		return "XLS V3";
 	}
 
 	@Override
