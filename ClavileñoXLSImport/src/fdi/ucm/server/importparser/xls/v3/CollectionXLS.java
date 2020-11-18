@@ -421,7 +421,6 @@ public class CollectionXLS implements InterfaceXLSparser {
 		CompleteGrammar Grammar=new CompleteGrammar(hoja.getName(), Filename, coleccionstatica);
 		coleccionstatica.getMetamodelGrammar().add(Grammar);
 		HashMap<Integer, CompleteTextElementType> Hash=new HashMap<Integer, CompleteTextElementType>();
-		HashMap<Integer, CompleteLinkElementType> HashL=new HashMap<Integer, CompleteLinkElementType>();
 		HashMap<String, CompleteTextElementType> HashPath=new HashMap<String, CompleteTextElementType>();
 		
 		 CompleteTextElementType Descripccion=null;
@@ -429,20 +428,16 @@ public class CollectionXLS implements InterfaceXLSparser {
 		
 		 List<List<Cell>> Datos_celdas = ((HojaV2) hoja).getListaHijos();
 		 
-		 Set<Integer> IdsColumnasLink=new HashSet<Integer>();
-		 
-		 HashMap<Integer, List<Integer>> equivalenciaLinks_col_valoires=new HashMap<Integer, List<Integer>>();
+
+		 HashMap<Integer, Integer> equivalenciaLinks_col_valoires=new HashMap<Integer, Integer>();
 		  
 		  if (linkElements.get(hoja.getName()) != null) {
 			  HashSet<ColV_ColId> tablavalores = linkElements.get(hoja.getName());
 			  for (ColV_ColId val_id : tablavalores) {
-				  List<Integer> tab = equivalenciaLinks_col_valoires.get(val_id.getColumnaValor());
-				  if (tab==null)
-					  tab=new LinkedList<Integer>();
-				  tab.add(val_id.getColumnaId());
-				  equivalenciaLinks_col_valoires.put(val_id.getColumnaValor(), tab);
 				  
-				  IdsColumnasLink.add(val_id.getColumnaId());
+				  if (equivalenciaLinks_col_valoires.get(val_id.getColumnaId())==null)
+					  equivalenciaLinks_col_valoires.put(val_id.getColumnaId(), val_id.getColumnaValor());
+
 				  
 			}
 		  }
@@ -490,8 +485,6 @@ public class CollectionXLS implements InterfaceXLSparser {
 			    	
 			    	CompleteTextElementType C=generaStructura(Valor_de_celda,Grammar,HashPath);
 			    	
-			    	//TODO AQUI METEMOS EL TEMA
-			    	
 			    	
 			    	Hash.put(new Integer(j), C);
 //			    	System.out.print("Columna:" + Valor_de_celda + "\t\t");
@@ -508,63 +501,7 @@ public class CollectionXLS implements InterfaceXLSparser {
 			   
 		   }
 		  
-		 
-		  
-		  
-		  
-		  HashMap<Integer, HashMap<K, V>> listaNewLinks=new HashMap<Integer, List<CompleteLinkElementType>>();
-		  
-		  
-		  HashMap<Long, List<CompleteLinkElementType>> listaNewLinks=new HashMap<Long, List<CompleteLinkElementType>>();
-		  
-		  for (int j = 0; j < Lista_celda_temporal0.size(); j++)
-		  {  
-			
-			 
-			if(equivalenciaLinks_col_valoires.get(new Integer(j))!=null)
-			{
-				
-			}
-			  
-			  
-		  if (linkElements.get(hoja.getName()) != null&&linkElements.get(hoja.getName()).containsKey(new Integer(j)))
-	    		{
-			  CompleteTextElementType C=Hash.get(new Integer(j));
-			  
-			  Dest_Por destinosLoca = linkElements.get(hoja.getName()).get(new Integer(j));
-			  
-			  if (listaNewLinks.get(destinosLoca.getDestino())!=null)
-			  {
-				  HashL.put(new Integer(j), listaNewLinks.get(destinosLoca.getDestino()));
-			  }
-			  else
-			  {
-			  
-			  CompleteLinkElementType CL=new CompleteLinkElementType("LINKED",C.getFather(), C.getCollectionFather());
-			  CL.setSons(C.getSons());
-			  
-			  if (C.getFather()==null)
-				  C.getCollectionFather().getSons().add(CL);
-			  else
-				  C.getFather().getSons().add(CL);
 
-			  listaNewLinks.put(destinosLoca.getDestino(), CL);
-			  
-//			  Hash.remove(new Integer(j));
-			  HashL.put(new Integer(j), CL);
-			  System.out.println(j+":"+CL.getName()+"->> Deberia ser un Link");
-			  }
-	    		}
-			  
-			 
-	    	
-	    		}
-			 
-			 
-		  HashMap<String,List<CompleteLinkElement>> NuevasPersonas=new  HashMap<String,List<CompleteLinkElement>>();
-		  
-		  CompleteDocuments DocAUX=new CompleteDocuments(null, "aux", "aux");  
-		  
 		  
 		  for (int i = 1; i < Datos_celdas.size(); i++) {
 		 
