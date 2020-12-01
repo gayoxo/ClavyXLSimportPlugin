@@ -19,6 +19,7 @@ import fdi.ucm.server.modelComplete.collection.document.CompleteTextElement;
 import fdi.ucm.server.modelComplete.collection.grammar.CompleteElementType;
 import fdi.ucm.server.modelComplete.collection.grammar.CompleteGrammar;
 import fdi.ucm.server.modelComplete.collection.grammar.CompleteLinkElementType;
+import fdi.ucm.server.modelComplete.collection.grammar.CompleteOperationalValueType;
 import fdi.ucm.server.modelComplete.collection.grammar.CompleteTextElementType;
 
 import java.io.File;
@@ -196,7 +197,24 @@ public class CollectionXLS implements InterfaceXLSparser {
 			 
 			 
 			 for (CompleteDocuments docu : preCol.getEstructuras())				
-				ListaHash.put(docu.getClavilenoid(), docu);
+				{
+				 for (CompleteElement elementosDoc : docu.getDescription()) {
+					CompleteElementType CET=elementosDoc.getHastype();
+					for (CompleteOperationalValueType covt : CET.getShows()) {
+						if (covt.getName().equals("oldid")&&elementosDoc instanceof CompleteTextElement)
+						{
+							try {
+								Long idold=Long.parseLong(((CompleteTextElement)elementosDoc).getValue());
+								ListaHash.put(idold, docu);
+							} catch (Exception e) {
+								// no hay problema de que falle
+							}
+						}
+					}
+				}
+				 
+				 ListaHash.put(docu.getClavilenoid(), docu);
+				}
 			
 			 
 			 ArrayList<Hoja> Hojas=new ArrayList<Hoja>();
@@ -229,9 +247,17 @@ public class CollectionXLS implements InterfaceXLSparser {
 		return calculaColumnaIntAbs(columns)-1;
 	}
 
-	private int calculaColumnaIntAbs(String columns) {
+	private int calculaColumnaIntAbs(String columnsIn) {
 		 Integer Final=0;
 		    
+		 StringBuilder input1 = new StringBuilder();
+		 
+		 input1.append(columnsIn);
+		 
+		 input1=input1.reverse();
+		 
+		 String columns = input1.toString();
+		 
 		    int BaseZ = 26;
 		    
 		    for (int j=0; j<columns.toUpperCase().length();j++)
@@ -509,6 +535,27 @@ public class CollectionXLS implements InterfaceXLSparser {
 						  valor.getFather().getSons().add(pos,CLE);						  
 						  }
 					  }
+				  else
+					  {
+					  
+					  int pos=-1;
+					  for (int i = 0; i < valor.getCollectionFather().getSons().size(); i++) 
+						  if (valor.getCollectionFather().getSons().get(i)==valor)
+							  pos=i;
+						
+					
+					  if (pos==-1)
+						  valor.getCollectionFather().getSons().add(CLE);
+					  else
+						  {
+						  valor.getCollectionFather().getSons().remove(pos);
+						  valor.getCollectionFather().getSons().add(pos,CLE);						  
+						  }
+					  
+					  
+					  
+					  
+					  }
 				  
 				  Hash.put(new Integer(j), CLE);
 			  }
@@ -557,7 +604,8 @@ public class CollectionXLS implements InterfaceXLSparser {
 		     }else
 		    	 Valor_de_celda = hssfCell.toString();
 		 
-		 
+			   }
+			   
 
 		    	CompleteElementType C=Hash.get(new Integer(j));
 		    	
@@ -567,7 +615,7 @@ public class CollectionXLS implements InterfaceXLSparser {
 		    	{
 		    	
 		    		CompleteElement CT=null;
-		    	if (C instanceof CompleteTextElementType)	
+		    	if (C instanceof CompleteTextElementType && !Valor_de_celda.isEmpty())	
 		    		CT=new CompleteTextElement((CompleteTextElementType)C, Valor_de_celda);
 
 		    	if (C instanceof CompleteLinkElementType)	
@@ -576,6 +624,14 @@ public class CollectionXLS implements InterfaceXLSparser {
 		    		CompleteDocuments DocuLin=null;
 						if (!Valor_de_celda.isEmpty())
 						{
+							
+							try {
+								Float LPV=Float.parseFloat(Valor_de_celda);	
+								 DocuLin = listaDocumento.get(LPV.longValue()); 
+								} catch (Exception e) {
+									//NO PASA NADA
+								}
+							
 							try {
 							Long LPV=Long.parseLong(Valor_de_celda);	
 							 DocuLin = listaDocumento.get(LPV); 
@@ -585,7 +641,11 @@ public class CollectionXLS implements InterfaceXLSparser {
 						}	
 					
 					if (DocuLin!=null)	
+						{
 						CT=new CompleteLinkElement((CompleteLinkElementType)C, DocuLin);
+						 LogsOut.add("LINKED:"+DocuLin.getDescriptionText()+" LINKED OK");
+						
+						}
 					else
 						{
 						Integer j2 = equivalenciaLinks_col_valoires.get(new Integer(j));
@@ -628,6 +688,7 @@ public class CollectionXLS implements InterfaceXLSparser {
 						
 						}
 		    		}
+		    		}
 		    	
 		    	if (CT!=null)
 		    		Doc.getDescription().add(CT);
@@ -638,7 +699,7 @@ public class CollectionXLS implements InterfaceXLSparser {
 		    	
 		    	if (C==Icon)
 		    		Doc.setIcon(Valor_de_celda);
-		    	}
+		    	
 
 
     	
@@ -647,7 +708,7 @@ public class CollectionXLS implements InterfaceXLSparser {
 			   }
 			   
 			   
-		   }
+		   
 		   
 		
 		   

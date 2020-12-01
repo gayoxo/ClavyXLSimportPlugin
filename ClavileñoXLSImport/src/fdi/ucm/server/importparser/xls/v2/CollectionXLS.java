@@ -266,9 +266,18 @@ public class CollectionXLS implements InterfaceXLSparser {
 		return calculaColumnaIntAbs(columns)-1;
 	}
 
-	private int calculaColumnaIntAbs(String columns) {
+	private int calculaColumnaIntAbs(String columnsIn) {
 		 Integer Final=0;
 		    
+ StringBuilder input1 = new StringBuilder();
+		 
+		 input1.append(columnsIn);
+		 
+		 input1=input1.reverse();
+		 
+		 String columns = input1.toString();
+		 
+		 
 		    int BaseZ = 26;
 		    
 		    for (int j=0; j<columns.toUpperCase().length();j++)
