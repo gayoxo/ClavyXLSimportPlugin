@@ -435,14 +435,16 @@ public class CollectionXLS implements InterfaceXLSparser {
 		 List<List<Cell>> Datos_celdas = ((HojaV2) hoja).getListaHijos();
 		 
 
-		 HashMap<Integer, Integer> equivalenciaLinks_col_valoires=new HashMap<Integer, Integer>();
+		 HashMap<Integer, List<Integer>> equivalenciaLinks_col_valoires=new HashMap<Integer, List<Integer>>();
 		  
 		  if (linkElements.get(hoja.getName()) != null) {
 			  HashSet<ColV_ColId> tablavalores = linkElements.get(hoja.getName());
 			  for (ColV_ColId val_id : tablavalores) {
 				  
 				  if (equivalenciaLinks_col_valoires.get(val_id.getColumnaId())==null)
-					  equivalenciaLinks_col_valoires.put(val_id.getColumnaId(), val_id.getColumnaValor());
+					  equivalenciaLinks_col_valoires.put(val_id.getColumnaId(),new LinkedList<Integer>());
+				  
+				  equivalenciaLinks_col_valoires.get(val_id.getColumnaId()).add(val_id.getColumnaValor());
 
 				  
 			}
@@ -562,7 +564,7 @@ public class CollectionXLS implements InterfaceXLSparser {
 		  }
 		  
 		  
-		  HashMap<String,CompleteDocuments> Nuevos=new HashMap<String, CompleteDocuments>();
+		  HashMap<Integer,HashMap<String,CompleteDocuments>> Nuevos=new  HashMap<Integer,HashMap<String, CompleteDocuments>>();
 		  
 		  for (int i = 1; i < Datos_celdas.size(); i++) {
 		 
@@ -648,12 +650,20 @@ public class CollectionXLS implements InterfaceXLSparser {
 						}
 					else
 						{
-						Integer j2 = equivalenciaLinks_col_valoires.get(new Integer(j));
+						List<Integer> Lj2 = equivalenciaLinks_col_valoires.get(new Integer(j));
 						
-						Cell hssfCell2 = Lista_celda_temporal.get(j2);
+						//Collections.sort(Lj2);
+						
+						StringBuffer SBValor=new StringBuffer();
 						 
+						
+						for (Integer j2 : Lj2) {
+							
+						
 					     
 					     String Valor_de_celda2 = "";
+						 
+					     Cell hssfCell2 = Lista_celda_temporal.get(j2);
 						 
 						   if (Lista_celda_temporal.get(j2)!=null)
 						   {
@@ -677,16 +687,28 @@ public class CollectionXLS implements InterfaceXLSparser {
 					     }else
 					    	 Valor_de_celda2 = hssfCell2.toString();
 					     
-					     CompleteDocuments nuevoYaCreado=Nuevos.get(Valor_de_celda2);
+					     SBValor.append(Valor_de_celda2+" ");
+						   }
+					     
+						}
+						
+						HashMap<String, CompleteDocuments> NuevosTabla = Nuevos.get(new Integer(j));
+						if (NuevosTabla==null)
+							NuevosTabla=new HashMap<String, CompleteDocuments>();
+						
+						
+					     CompleteDocuments nuevoYaCreado=NuevosTabla.get(SBValor.toString().trim());
 						if (nuevoYaCreado==null)
 							{
-							nuevoYaCreado=new CompleteDocuments(coleccionstatica, Valor_de_celda2, "");
-							Nuevos.put(Valor_de_celda2, nuevoYaCreado);
+							nuevoYaCreado=new CompleteDocuments(coleccionstatica, SBValor.toString().trim(), "");
+							NuevosTabla.put(SBValor.toString().trim(), nuevoYaCreado);
 							}
 						
 						CT=new CompleteLinkElement((CompleteLinkElementType)C, nuevoYaCreado);	
 						
-						}
+						
+						Nuevos.put(new Integer(j), NuevosTabla);
+						
 		    		}
 		    		}
 		    	
@@ -718,14 +740,27 @@ public class CollectionXLS implements InterfaceXLSparser {
 		 
 		  if (Nuevos.size()>0)
 		  {
+			  
 			  CompleteGrammar GrammarPP=new CompleteGrammar("CREATED", Filename, coleccionstatica);
 				coleccionstatica.getMetamodelGrammar().add(GrammarPP);
+			  
+		  for (Entry<Integer, HashMap<String, CompleteDocuments>> doccrea_int : Nuevos.entrySet()) {
+			  
+			  CompleteElementType C=Hash.get(new Integer(doccrea_int.getKey()));
+			  
+			  String CName="~unamed";
+			  if (C!=null)
+				  CName=C.getName();
+			  
+			 
+			
+			CompleteTextElementType Nombre =new CompleteTextElementType("VALUE BY \""+ CName + "\"", GrammarPP);
+			GrammarPP.getSons().add(Nombre);
+			  
+			  for (Entry<String, CompleteDocuments> doccrea : doccrea_int.getValue().entrySet()) {
 				
-				CompleteTextElementType Nombre =new CompleteTextElementType("VALUE", GrammarPP);
-				GrammarPP.getSons().add(Nombre);
-				
-		  for (Entry<String, CompleteDocuments> doccrea : Nuevos.entrySet()) {
-			  LogsOut.add("CREATED:"+doccrea.getKey()+" CREATED");
+			
+			  LogsOut.add("CREATED BY \""+ CName + "\":"+doccrea.getKey()+" CREATED");
 			  
 			  CompleteDocuments Doc=doccrea.getValue();  
 			  coleccionstatica.getEstructuras().add(Doc);
@@ -737,6 +772,7 @@ public class CollectionXLS implements InterfaceXLSparser {
 	        	
 	        	
 			}
+		  }
 		  }
 		
 	}	 
