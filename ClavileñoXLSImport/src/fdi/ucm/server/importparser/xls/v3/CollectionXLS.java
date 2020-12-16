@@ -33,6 +33,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
+
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.usermodel.Cell;
@@ -565,6 +567,7 @@ public class CollectionXLS implements InterfaceXLSparser {
 		  
 		  
 		  HashMap<Integer,HashMap<String,CompleteDocuments>> Nuevos=new  HashMap<Integer,HashMap<String, CompleteDocuments>>();
+		  HashMap<CompleteDocuments, Set<CompleteDocuments>> LinkedReverse=new HashMap<CompleteDocuments, Set<CompleteDocuments>>();
 		  
 		  for (int i = 1; i < Datos_celdas.size(); i++) {
 		 
@@ -706,6 +709,15 @@ public class CollectionXLS implements InterfaceXLSparser {
 						
 						CT=new CompleteLinkElement((CompleteLinkElementType)C, nuevoYaCreado);	
 						
+						Set<CompleteDocuments> ListaReverseA = LinkedReverse.get(nuevoYaCreado);
+						
+						if (ListaReverseA==null)
+							ListaReverseA=new HashSet<CompleteDocuments>();
+						
+						ListaReverseA.add(Doc);
+						
+						LinkedReverse.put(nuevoYaCreado, ListaReverseA);
+						
 						
 						Nuevos.put(new Integer(j), NuevosTabla);
 						
@@ -730,19 +742,38 @@ public class CollectionXLS implements InterfaceXLSparser {
 			   }
 			   
 			   
-		   
-		   
-		
-		   
-
-		 
 		  }
 		 
 		  if (Nuevos.size()>0)
 		  {
 			  
+			  int max_=0;
+			  
+			  for (Entry<CompleteDocuments, Set<CompleteDocuments>> lisnkderever : LinkedReverse.entrySet()) {
+				if (lisnkderever.getValue().size()>max_)
+					max_=lisnkderever.getValue().size();
+			}
+			  
+			  
+			  List<CompleteLinkElementType> ReverseList=new LinkedList<CompleteLinkElementType>();
+			  
 			  CompleteGrammar GrammarPP=new CompleteGrammar("CREATED", Filename, coleccionstatica);
 				coleccionstatica.getMetamodelGrammar().add(GrammarPP);
+				
+				
+				
+				CompleteLinkElementType reverRel =new CompleteLinkElementType("REVERSE RELATION", GrammarPP);
+				GrammarPP.getSons().add(reverRel);
+				
+				ReverseList.add(reverRel);
+				
+				for (int i = 1; i < max_; i++) {
+					reverRel.setMultivalued(true);
+					CompleteLinkElementType reverRelSon =new CompleteLinkElementType("REVERSE RELATION", GrammarPP);
+					reverRelSon.setClassOfIterator(reverRel);
+					GrammarPP.getSons().add(reverRelSon);
+					ReverseList.add(reverRelSon);
+				}
 			  
 		  for (Entry<Integer, HashMap<String, CompleteDocuments>> doccrea_int : Nuevos.entrySet()) {
 			  
@@ -768,7 +799,14 @@ public class CollectionXLS implements InterfaceXLSparser {
 			  Doc.getDescription().add(tete);
 			  
 	        	
-	        	
+			  List<CompleteDocuments> ListaLinkeded = new LinkedList<CompleteDocuments>(LinkedReverse.get(Doc));
+			  
+			  for (int i = 0; i < ListaLinkeded.size(); i++) {
+				  
+				  
+				  CompleteLinkElement teteL=new CompleteLinkElement(ReverseList.get(i), ListaLinkeded.get(i));
+				  Doc.getDescription().add(teteL);
+			}
 	        	
 	        	
 			}
