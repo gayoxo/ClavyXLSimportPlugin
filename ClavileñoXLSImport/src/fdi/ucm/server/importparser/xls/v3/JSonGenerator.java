@@ -2,17 +2,37 @@ package fdi.ucm.server.importparser.xls.v3;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Scanner;
 
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.util.CellReference;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+import fdi.ucm.server.importparser.xls.v3.CollectionXLS.FileFormat;
+import fdi.ucm.server.importparser.xls.v3.struture.Hoja;
+import fdi.ucm.server.importparser.xls.v3.struture.HojaV2;
+
 public class JSonGenerator {
 
+	enum FileFormat {OLD,NEW};
+	
 	public static void main(String[] args) {
 		
 		String preLan="es";
@@ -105,8 +125,230 @@ public class JSonGenerator {
 		
 		}
 		
-		myObj.close();
-		System.out.println(SelectedFile.getName());
+		
+		
+		
+		 HashMap<String,HashMap<String,String>> Hojas=new HashMap<String,HashMap<String,String>>();
+
+			
+		 try {
+			 if (SelectedFile.getName().endsWith(".xlsx")) 
+				  Hojas=GENERAR(SelectedFile.getName(),FileFormat.NEW); 
+			 else if (SelectedFile.getName().endsWith(".xls")) 
+				  Hojas=GENERAR(SelectedFile.getName(),FileFormat.OLD);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		 
+		  System.out.println();
+		  boolean seleccion2=false;
+		  String SelectedHoja=null;
+		  while (!seleccion2)
+			{
+		 int index2=1;
+		 HashMap<Integer, String> HojaSelect=new HashMap<Integer, String>();
+		 System.out.println(GetString(preLan,"input_hoja",prop,"Seleccionar la hoja a procesar"));
+		for (Entry<String, HashMap<String, String>> ee : Hojas.entrySet()) {
+			HojaSelect.put(new Integer(index2), ee.getKey());
+			System.out.println(index2+": "+ee.getKey());
+			index2++;
+		}
+
+		Integer entrada=-1;
+		
+		try {
+			entrada=Integer.parseInt(myObj.nextLine());
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+				
+		
+		if (entrada>0&&entrada<index2)
+		{
+			SelectedHoja=HojaSelect.get(new Integer(entrada));
+			seleccion2=true;
+		}else
+		{
+			System.err.println(GetString(preLan,"input_error",prop,"Entrada no valida"));
+			System.out.println();
+		}
+		
+			}
+		  
+		  String SelectedID=null;
+		  if (SelectedHoja!=null)
+		  {
+			  boolean seleccion3=false;
+			  
+			  while (!seleccion3)
+				{
+			  System.out.println();
+			  System.out.println(GetString(preLan,"input_columna_id",prop,"Seleccionar la columna con el identificador de CLAVY a procesar"));
+			  HashMap<Integer, String> C_ID_Select=new HashMap<Integer, String>();
+			  int index3=1;
+			  for (Entry<String, String> colid : Hojas.get(SelectedHoja).entrySet()) {
+				  C_ID_Select.put(new Integer(index3), colid.getKey());
+					System.out.println(index3+": "+colid.getValue());
+					index3++;
+			  }
+			  
+			  Integer entrada=-1;
+				
+				try {
+					entrada=Integer.parseInt(myObj.nextLine());
+				} catch (Exception e) {
+					// TODO: handle exception
+				}
+			  
+			  
+			  if (entrada>0&&entrada<index3)
+				{
+				  SelectedID=C_ID_Select.get(new Integer(entrada));
+					seleccion3=true;
+				}else
+				{
+					System.err.println(GetString(preLan,"input_error",prop,"Entrada no valida"));
+					System.out.println();
+				}
+			  
+				}
+		  }
+		  
+		  String SelectedValor=null;
+		  if (SelectedID!=null)
+		  {
+			  boolean seleccion4=false;
+			  
+			  while (!seleccion4)
+				{
+			  System.out.println();
+			  System.out.println(GetString(preLan,"input_columna_id",prop,"Seleccionar la columna con el identificador de CLAVY a procesar"));
+			  HashMap<Integer, String> C_ID_Select=new HashMap<Integer, String>();
+			  int index3=1;
+			  for (Entry<String, String> colid : Hojas.get(SelectedHoja).entrySet()) {
+				  C_ID_Select.put(new Integer(index3), colid.getKey());
+					System.out.println(index3+": "+colid.getValue());
+					index3++;
+			  }
+			  
+			  Integer entrada=-1;
+				
+				try {
+					entrada=Integer.parseInt(myObj.nextLine());
+				} catch (Exception e) {
+					// TODO: handle exception
+				}
+			  
+			  
+			  if (entrada>0&&entrada<index3)
+				{
+				  SelectedValor=C_ID_Select.get(new Integer(entrada));
+				  seleccion4=true;
+				}else
+				{
+					System.err.println(GetString(preLan,"input_error",prop,"Entrada no valida"));
+					System.out.println();
+				}
+			  
+				}
+		  }
+		  
+		  
+		  
+		  
+		  myObj.close();
+	}
+
+	private static HashMap<String,HashMap<String,String>> GENERAR(String Nombre_Archivo, FileFormat FileFormatIn) throws IOException {
+
+		HashMap<String,HashMap<String,String>> Salida=new HashMap<String,HashMap<String,String>>();
+		 
+
+			  Workbook Libro_trabajo;
+			  
+			  
+			  /**
+				 
+			    * Crea una nueva instancia de la clase FileInputStream
+			 
+			    */
+			 
+			   FileInputStream fileInputStream = new FileInputStream(
+			 
+			     Nombre_Archivo);
+			 
+			  
+			  if (FileFormatIn==FileFormat.NEW)
+			  {
+
+				   /**
+				 
+				    * Crea una nueva instancia de la clase XSSFWorkBook
+				 
+				    */
+				 
+				   Libro_trabajo = new XSSFWorkbook(fileInputStream);
+			  }
+			  else
+			  {
+
+				   POIFSFileSystem fsFileSystem = new POIFSFileSystem(fileInputStream);
+				   
+				   Libro_trabajo = new HSSFWorkbook(fsFileSystem);
+				 
+			  }
+		 
+		 
+			  int NStilos=Libro_trabajo.getNumberOfSheets(); 
+			  
+			  for (int i = 0; i < NStilos; i++) {
+				  
+				  Sheet Hoja_hssf = Libro_trabajo.getSheetAt(i);
+				   
+				   Iterator<Row> Iterador_de_Fila = Hoja_hssf.rowIterator();
+					 
+				   HashMap<String, String> SalidaPar = new HashMap<String,String>();
+				   
+				   Row Fila_hssf = (Row) Iterador_de_Fila.next();
+				   
+
+					   Iterator<Cell> iterador = Fila_hssf.cellIterator();
+				    	while (iterador.hasNext()) {
+				    		Cell hssfCell = (Cell) iterador.next();
+				    		String column_letter = CellReference.convertNumToColString(hssfCell.getColumnIndex());
+						    
+				    		 String Valor_de_celda = "~uname";
+							 
+
+						     
+						     if(hssfCell.getCellType() == Cell.CELL_TYPE_FORMULA){
+						    	 switch(hssfCell.getCachedFormulaResultType()) {
+						            case Cell.CELL_TYPE_NUMERIC:
+						                System.out.println("Last evaluated as: " + hssfCell.getNumericCellValue());
+						                Valor_de_celda=Double.toString(hssfCell.getNumericCellValue());
+						                break;
+						            case Cell.CELL_TYPE_STRING:
+						                System.out.println("Last evaluated as \"" + hssfCell.getRichStringCellValue() + "\"");
+						                Valor_de_celda=hssfCell.getRichStringCellValue().toString();
+						                break;
+						             default:
+						            	Valor_de_celda = hssfCell.toString();
+								        break;
+						                	
+						        }
+						     }else
+						    	 Valor_de_celda = hssfCell.toString();
+						 
+						 
+						     SalidaPar.put(column_letter, Valor_de_celda);	
+				    	
+				    	}
+				    	
+				   
+				 Salida.put(Hoja_hssf.getSheetName(), SalidaPar); 
+			  }
+		
+		return Salida;
 	}
 
 	private static String GetString(String preLan, String string, Properties prop,String Default) {
