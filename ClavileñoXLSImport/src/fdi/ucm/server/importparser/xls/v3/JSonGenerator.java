@@ -2,11 +2,13 @@ package fdi.ucm.server.importparser.xls.v3;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Scanner;
@@ -19,6 +21,10 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
+import com.cedarsoftware.util.io.JsonWriter;
 
 public class JSonGenerator {
 
@@ -45,6 +51,7 @@ public class JSonGenerator {
 		
 	}
 	
+	@SuppressWarnings({ "unchecked", "resource" })
 	public static void main(String[] args) {
 		
 		String preLan="es";
@@ -91,6 +98,7 @@ public class JSonGenerator {
 		boolean seleccion=false;
 		
 		Scanner myObj = new Scanner(System.in);
+		JSonGenerator myObjBase=new JSonGenerator();
 		
 		File SelectedFile=null;
 		
@@ -153,6 +161,8 @@ public class JSonGenerator {
 		}
 		 
 		 boolean continuarAdd=true;
+		 
+		 List<JSonGeneratorTriplet> ListaSalida=new LinkedList<JSonGenerator.JSonGeneratorTriplet>();
 		 
 		 while (continuarAdd){
 		  System.out.println();
@@ -237,7 +247,7 @@ public class JSonGenerator {
 			  while (!seleccion4)
 				{
 			  System.out.println();
-			  System.out.println(GetString(preLan,"input_columna_id",prop,"Seleccionar la columna con el identificador de CLAVY a procesar"));
+			  System.out.println(GetString(preLan,"input_columna_valor",prop,"Seleccionar la columna con el valor por omision de ID para procesar"));
 			  HashMap<Integer, String> C_ID_Select=new HashMap<Integer, String>();
 			  int index3=1;
 			  for (Entry<String, String> colid : Hojas.get(SelectedHoja).entrySet()) {
@@ -275,7 +285,14 @@ public class JSonGenerator {
 			  System.out.println(GetString(preLan,"pestana_confirm_values",prop,"Pestaña")+":"+SelectedHoja+ "  //  "+
 					  GetString(preLan,"ide_confirm_values",prop,"Columna Identificador")+":"+Hojas.get(SelectedHoja).get(SelectedID)+ "  //  " +
 					  GetString(preLan,"value_confirm_values",prop,"Columna Valor en caso de omision")+":"+Hojas.get(SelectedHoja).get(SelectedValor));
+			  System.out.println(GetString(preLan,"confirm_add",prop,"Pulsa para añadir, NO para no agregar"));
+			  String continueStringIn=myObj.nextLine();
+			  	if (!continueStringIn.toLowerCase().equals("no"))
+			  		ListaSalida.add(myObjBase.new JSonGeneratorTriplet(SelectedHoja, SelectedID, SelectedValor));
+
 		  }
+		  
+		  
 		  
 		  
 		  System.out.println();
@@ -291,8 +308,38 @@ public class JSonGenerator {
 		  System.out.println();
 		  
 	}
+		 
+		 
+		 if (ListaSalida.size()>0)
+		 {
+		  JSONArray Salida=new JSONArray();
+		  for (JSonGeneratorTriplet JSOGT : ListaSalida) {
+			  
+			  JSONObject input_elem=new JSONObject();
+			  input_elem.put("Sheet", JSOGT.Hoja);
+			  input_elem.put("ColVal", JSOGT.ColValue);
+			  input_elem.put("ColId", JSOGT.ColId);
+			
+			  Salida.add(input_elem);
+		}
+		  
+		  String niceFormattedJson = JsonWriter.formatJson(Salida.toString());
+		  
+		  try {
+		      FileWriter myWriter = new FileWriter(SelectedFile.getAbsolutePath().concat(".json"));
+		      myWriter.write(niceFormattedJson);
+		      myWriter.close();
+		      System.out.println(GetString(preLan,"saving_succes_label",prop,"Archivo salvado correctamente en "+":" + SelectedFile.getName().concat(".json")));
+		    } catch (IOException e) {
+		    	System.out.println(GetString(preLan,"saving_error_label",prop,"Error salvando archivo."));
+		      e.printStackTrace();
+		    }
+		 }
+		 else
+			 System.out.println(GetString(preLan,"saving_empty_label",prop,"No hay relaciones para salvar."));
 		  
 		  myObj.close();
+		  System.out.println(GetString(preLan,"exit",prop,"Exit"));
 	}
 
 	private static HashMap<String,HashMap<String,String>> GENERAR(String Nombre_Archivo, FileFormat FileFormatIn) throws IOException {
