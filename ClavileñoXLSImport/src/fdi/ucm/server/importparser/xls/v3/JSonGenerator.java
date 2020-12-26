@@ -435,8 +435,8 @@ public class JSonGenerator {
 	}
 
 	private static String GetString(String preLan, String string, Properties prop,String Default) {
-		if (prop.get(preLan+"_"+string)!=null)
-			return prop.get(preLan+"_"+string).toString();
+		if (prop.get(preLan+"__"+string)!=null)
+			return prop.get(preLan+"__"+string).toString();
 		else
 			return Default;
 	}
