@@ -140,6 +140,9 @@ public class JSonGenerator {
 			e.printStackTrace();
 		}
 		 
+		 boolean continuarAdd=true;
+		 
+		 while (continuarAdd){
 		  System.out.println();
 		  boolean seleccion2=false;
 		  String SelectedHoja=null;
@@ -253,8 +256,26 @@ public class JSonGenerator {
 				}
 		  }
 		  
+		  if (SelectedValor!=null)
+		  {
+			  System.out.println();
+			  System.out.println(GetString(preLan,"confirm_values",prop,"Esta seguro de que desea añadir la siguiente informacion?"));
+			  System.out.println(GetString(preLan,"pestana_confirm_values",prop,"Pestaña")+":"+SelectedHoja+ "  //  "+
+					  GetString(preLan,"ide_confirm_values",prop,"Columna Identificador")+":"+Hojas.get(SelectedHoja).get(SelectedID)+ "  //  " +
+					  GetString(preLan,"value_confirm_values",prop,"Columna Valor en caso de omision")+":"+Hojas.get(SelectedHoja).get(SelectedValor));
+		  }
 		  
 		  
+		  System.out.println();
+		  System.out.println(GetString(preLan,"confirm_add_relacion",prop,"Desea añadir otra relacion? Introducir NO para parar"));
+		  String continueStringIn=myObj.nextLine();
+		  if (continueStringIn.toLowerCase().equals("no"))
+			  continuarAdd=false;
+  
+		  if (continuarAdd)
+			  System.out.println(GetString(preLan,"confirm_add_relacion",prop,"Desea añadir otra relacion? Introducir NO para parar"));
+		  
+	}
 		  
 		  myObj.close();
 	}
