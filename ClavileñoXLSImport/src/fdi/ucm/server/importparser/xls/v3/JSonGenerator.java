@@ -2,16 +2,11 @@ package fdi.ucm.server.importparser.xls.v3;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Scanner;
@@ -25,13 +20,30 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import fdi.ucm.server.importparser.xls.v3.CollectionXLS.FileFormat;
-import fdi.ucm.server.importparser.xls.v3.struture.Hoja;
-import fdi.ucm.server.importparser.xls.v3.struture.HojaV2;
-
 public class JSonGenerator {
 
 	enum FileFormat {OLD,NEW};
+	class JSonGeneratorTriplet
+	{
+		String Hoja;
+		String ColId;
+		String ColValue;
+		
+		@SuppressWarnings("unused")
+		private JSonGeneratorTriplet() {
+			
+		}
+
+		public JSonGeneratorTriplet(String hoja, String colId, String colValue) {
+			super();
+			Hoja = hoja;
+			ColId = colId;
+			ColValue = colValue;
+		}
+		
+		
+		
+	}
 	
 	public static void main(String[] args) {
 		
@@ -273,7 +285,10 @@ public class JSonGenerator {
 			  continuarAdd=false;
   
 		  if (continuarAdd)
-			  System.out.println(GetString(preLan,"confirm_add_relacion",prop,"Desea añadir otra relacion? Introducir NO para parar"));
+			  System.out.println(GetString(preLan,"continuar_label",prop,"Reiniciando el proceso de seleccion"));
+		  else
+			  System.out.println(GetString(preLan,"ending_label",prop,"Parando el proceso de seleccion"));
+		  System.out.println();
 		  
 	}
 		  
